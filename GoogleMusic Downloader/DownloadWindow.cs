@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,6 +10,7 @@ using System.Windows.Forms;
 using System.Net;
 using System.Threading;
 using GoogleMusic_Downloader.Model;
+using HundredMilesSoftware.UltraID3Lib;
 
 namespace GoogleMusic_Downloader
 {
@@ -42,23 +44,89 @@ namespace GoogleMusic_Downloader
 
         void client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
-            lbTitle.Text = "Nothing";
+			tagFile(_files[0]);
+
+			lbTitle.Text = "Nothing";
+
             progressBar1.Value++;
             _files.RemoveAt(0);
             listBox1.DataSource = _files;
-            if (_files.Count > 0)
-                DownloadNext();
+			if (_files.Count > 0)
+				DownloadNext();
         }
 
+		// Update ID3 tags on the downloaded mp3
+		private void tagFile(MusicFile file)
+		{
+			int iRetries = 0;
+			_files[0].DownloadedFile.Refresh();
+			while ((!_files[0].DownloadedFile.Exists || _files[0].DownloadedFile.Length == 0) && iRetries < 30)
+			{
+				// Downloaded, but not flushed?  Sleep for a little while.
+				iRetries++;
+				System.Threading.Thread.Sleep(1000);
+				_files[0].DownloadedFile.Refresh();
+			}
+
+			if (iRetries == 30)
+			{
+				// The file was never written.  We really need some proper error handling, but this will have to
+				// do for now.
+				throw new Exception("File " + _files[0].DownloadedFile.Name + " has a size of zero bytes and cannot be tagged.");
+			}
+			else
+			{
+				UltraID3 tagger = new UltraID3();
+				tagger.Read(file.DownloadedFile.FullName);
+
+				tagger.ID3v2Tag.Album = file.Album;
+				tagger.ID3v2Tag.Artist = file.Artist;
+				tagger.ID3v2Tag.Title = file.Title;
+
+				tagger.Write();
+			}
+		}
+
         private void DownloadNext()
-        {                        
+        {
             lbTitle.Text = _files[0].ToString();
             _findFilesWindow.DownloadFile(_files[0]);
         }        
 
         public void newUrl(string url)
         {
-            _client.DownloadFileAsync(new Uri(url), _files[0].Artist + " - " + _files[0].Title + ".mp3");
+			String sName = _files[0].Artist + " - " + _files[0].Title;
+			
+			// Replace characters that are invalid in a windows filename with "_"
+			char[] invalidChars = Path.GetInvalidFileNameChars();
+			foreach (char invalidChar in invalidChars)
+			{
+				sName = sName.Replace(invalidChar.ToString(), "_");
+			}
+
+			// If the file is already there, rename it.
+			FileInfo file = new FileInfo(sName + ".mp3");
+			int iCount = 0;
+			bool bRename = file.Exists;
+			while (bRename)
+			{
+				iCount++;
+				String sTempName = sName + " (" + iCount + ")";
+				file = new FileInfo(sTempName + ".mp3");
+				bRename = file.Exists;
+			}
+
+			// "file" should now point to the destination to download to
+			_files[0].DownloadedFile = file;
+			
+            _client.DownloadFileAsync(new Uri(url), _files[0].DownloadedFile.FullName);
         }
+
+		private void onClose(object sender, FormClosingEventArgs e)
+		{
+			// Make sure the hidden browser window is disposed of as well
+			_findFilesWindow.Close();
+		}
+
     }
 }
