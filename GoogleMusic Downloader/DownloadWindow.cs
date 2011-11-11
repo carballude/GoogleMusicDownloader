@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Net;
 using System.Threading;
 using GoogleMusic_Downloader.Model;
+using HundredMilesSoftware.UltraID3Lib;
 
 namespace GoogleMusic_Downloader
 {
@@ -44,12 +45,28 @@ namespace GoogleMusic_Downloader
         void client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
             lbTitle.Text = "Nothing";
+
+			tagFile(_files[0]);
+
             progressBar1.Value++;
             _files.RemoveAt(0);
             listBox1.DataSource = _files;
 			if (_files.Count > 0)
 				DownloadNext();
         }
+
+		// Update ID3 tags on the downloaded mp3
+		private void tagFile(MusicFile file)
+		{
+			UltraID3 tagger = new UltraID3();
+			tagger.Read(file.DownloadedFile.FullName);
+
+			tagger.ID3v2Tag.Album = file.Album;
+			tagger.ID3v2Tag.Artist = file.Artist;
+			tagger.ID3v2Tag.Title = file.Title;
+
+			tagger.Write();
+		}
 
         private void DownloadNext()
         {                        
@@ -59,34 +76,31 @@ namespace GoogleMusic_Downloader
 
         public void newUrl(string url)
         {
-			String sTitle = _files[0].Artist + " - " + _files[0].Title;
+			String sName = _files[0].Artist + " - " + _files[0].Title;
 			
 			// Replace characters that are invalid in a windows filename with "_"
 			char[] invalidChars = Path.GetInvalidFileNameChars();
 			foreach (char invalidChar in invalidChars)
 			{
-				sTitle = sTitle.Replace(invalidChar.ToString(), "_");
+				sName = sName.Replace(invalidChar.ToString(), "_");
 			}
 
 			// If the file is already there, rename it.
-			FileInfo file = new FileInfo(sTitle + ".mp3");
+			FileInfo file = new FileInfo(sName + ".mp3");
 			int iCount = 0;
 			bool bRename = file.Exists;
 			while (bRename)
 			{
 				iCount++;
-				String sTempTitle = sTitle + " (" + iCount + ")";
-				file = new FileInfo(sTempTitle + ".mp3");
+				String sTempName = sName + " (" + iCount + ")";
+				file = new FileInfo(sTempName + ".mp3");
 				bRename = file.Exists;
-
-				if (!bRename)
-				{
-					// Found a valid filename
-					sTitle = sTempTitle;
-				}
 			}
 
-            _client.DownloadFileAsync(new Uri(url), sTitle + ".mp3");
+			// "file" should now point to the destination to download to
+			_files[0].DownloadedFile = file;
+			
+            _client.DownloadFileAsync(new Uri(url), _files[0].DownloadedFile.FullName);
         }
 
 		private void onClose(object sender, FormClosingEventArgs e)
