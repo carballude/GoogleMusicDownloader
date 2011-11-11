@@ -44,9 +44,9 @@ namespace GoogleMusic_Downloader
 
         void client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
-            lbTitle.Text = "Nothing";
-
 			tagFile(_files[0]);
+
+			lbTitle.Text = "Nothing";
 
             progressBar1.Value++;
             _files.RemoveAt(0);
@@ -58,18 +58,37 @@ namespace GoogleMusic_Downloader
 		// Update ID3 tags on the downloaded mp3
 		private void tagFile(MusicFile file)
 		{
-			UltraID3 tagger = new UltraID3();
-			tagger.Read(file.DownloadedFile.FullName);
+			int iRetries = 0;
+			_files[0].DownloadedFile.Refresh();
+			while ((!_files[0].DownloadedFile.Exists || _files[0].DownloadedFile.Length == 0) && iRetries < 30)
+			{
+				// Downloaded, but not flushed?  Sleep for a little while.
+				iRetries++;
+				System.Threading.Thread.Sleep(1000);
+				_files[0].DownloadedFile.Refresh();
+			}
 
-			tagger.ID3v2Tag.Album = file.Album;
-			tagger.ID3v2Tag.Artist = file.Artist;
-			tagger.ID3v2Tag.Title = file.Title;
+			if (iRetries == 30)
+			{
+				// The file was never written.  We really need some proper error handling, but this will have to
+				// do for now.
+				throw new Exception("File " + _files[0].DownloadedFile.Name + " has a size of zero bytes and cannot be tagged.");
+			}
+			else
+			{
+				UltraID3 tagger = new UltraID3();
+				tagger.Read(file.DownloadedFile.FullName);
 
-			tagger.Write();
+				tagger.ID3v2Tag.Album = file.Album;
+				tagger.ID3v2Tag.Artist = file.Artist;
+				tagger.ID3v2Tag.Title = file.Title;
+
+				tagger.Write();
+			}
 		}
 
         private void DownloadNext()
-        {                        
+        {
             lbTitle.Text = _files[0].ToString();
             _findFilesWindow.DownloadFile(_files[0]);
         }        
@@ -108,5 +127,6 @@ namespace GoogleMusic_Downloader
 			// Make sure the hidden browser window is disposed of as well
 			_findFilesWindow.Close();
 		}
+
     }
 }

@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
 			this.listBox1 = new System.Windows.Forms.ListBox();
-			this.label1 = new System.Windows.Forms.Label();
+			this.lbActivity = new System.Windows.Forms.Label();
 			this.lbTitle = new System.Windows.Forms.Label();
 			this.progressBar1 = new System.Windows.Forms.ProgressBar();
 			this.songProgressBar = new System.Windows.Forms.ProgressBar();
@@ -44,14 +44,14 @@
 			this.listBox1.Size = new System.Drawing.Size(244, 381);
 			this.listBox1.TabIndex = 0;
 			// 
-			// label1
+			// lbActivity
 			// 
-			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(263, 92);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(95, 13);
-			this.label1.TabIndex = 1;
-			this.label1.Text = "Now downloading:";
+			this.lbActivity.AutoSize = true;
+			this.lbActivity.Location = new System.Drawing.Point(263, 92);
+			this.lbActivity.Name = "lbActivity";
+			this.lbActivity.Size = new System.Drawing.Size(95, 13);
+			this.lbActivity.TabIndex = 1;
+			this.lbActivity.Text = "Now downloading:";
 			// 
 			// lbTitle
 			// 
@@ -94,7 +94,7 @@
 			this.Controls.Add(this.songProgressBar);
 			this.Controls.Add(this.progressBar1);
 			this.Controls.Add(this.lbTitle);
-			this.Controls.Add(this.label1);
+			this.Controls.Add(this.lbActivity);
 			this.Controls.Add(this.listBox1);
 			this.Name = "DownloadWindow";
 			this.Text = "Google Music Backup - Pablo Carballude";
@@ -107,7 +107,7 @@
         #endregion
 
         private System.Windows.Forms.ListBox listBox1;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lbActivity;
         private System.Windows.Forms.Label lbTitle;
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.ProgressBar songProgressBar;
