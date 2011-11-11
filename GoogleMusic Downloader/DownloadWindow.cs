@@ -47,8 +47,8 @@ namespace GoogleMusic_Downloader
             progressBar1.Value++;
             _files.RemoveAt(0);
             listBox1.DataSource = _files;
-            if (_files.Count > 0)
-                DownloadNext();
+			if (_files.Count > 0)
+				DownloadNext();
         }
 
         private void DownloadNext()
@@ -70,5 +70,11 @@ namespace GoogleMusic_Downloader
 
             _client.DownloadFileAsync(new Uri(url), sFileName);
         }
+
+		private void onClose(object sender, FormClosingEventArgs e)
+		{
+			// Make sure the hidden browser window is disposed of as well
+			_findFilesWindow.Close();
+		}
     }
 }
