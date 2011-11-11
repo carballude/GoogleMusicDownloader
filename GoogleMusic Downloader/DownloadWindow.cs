@@ -59,16 +59,34 @@ namespace GoogleMusic_Downloader
 
         public void newUrl(string url)
         {
-			String sFileName = _files[0].Artist + " - " + _files[0].Title + ".mp3";
-
+			String sTitle = _files[0].Artist + " - " + _files[0].Title;
+			
 			// Replace characters that are invalid in a windows filename with "_"
 			char[] invalidChars = Path.GetInvalidFileNameChars();
 			foreach (char invalidChar in invalidChars)
 			{
-				sFileName = sFileName.Replace(invalidChar.ToString(), "_");
+				sTitle = sTitle.Replace(invalidChar.ToString(), "_");
 			}
 
-            _client.DownloadFileAsync(new Uri(url), sFileName);
+			// If the file is already there, rename it.
+			FileInfo file = new FileInfo(sTitle + ".mp3");
+			int iCount = 0;
+			bool bRename = file.Exists;
+			while (bRename)
+			{
+				iCount++;
+				String sTempTitle = sTitle + " (" + iCount + ")";
+				file = new FileInfo(sTempTitle + ".mp3");
+				bRename = file.Exists;
+
+				if (!bRename)
+				{
+					// Found a valid filename
+					sTitle = sTempTitle;
+				}
+			}
+
+            _client.DownloadFileAsync(new Uri(url), sTitle + ".mp3");
         }
 
 		private void onClose(object sender, FormClosingEventArgs e)
