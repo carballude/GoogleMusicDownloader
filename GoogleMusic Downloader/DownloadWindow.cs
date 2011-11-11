@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,7 +11,6 @@ using System.Net;
 using System.Threading;
 using GoogleMusic_Downloader.Model;
 
-// Test comment to check that I understand git correctly.
 namespace GoogleMusic_Downloader
 {
     public partial class DownloadWindow : Form
@@ -59,7 +59,16 @@ namespace GoogleMusic_Downloader
 
         public void newUrl(string url)
         {
-            _client.DownloadFileAsync(new Uri(url), _files[0].Artist + " - " + _files[0].Title + ".mp3");
+			String sFileName = _files[0].Artist + " - " + _files[0].Title + ".mp3";
+
+			// Replace characters that are invalid in a windows filename with "_"
+			char[] invalidChars = Path.GetInvalidFileNameChars();
+			foreach (char invalidChar in invalidChars)
+			{
+				sFileName = sFileName.Replace(invalidChar.ToString(), "_");
+			}
+
+            _client.DownloadFileAsync(new Uri(url), sFileName);
         }
     }
 }
