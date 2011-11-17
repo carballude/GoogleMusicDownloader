@@ -10,7 +10,6 @@ using System.Windows.Forms;
 using System.Net;
 using System.Threading;
 using GoogleMusic_Downloader.Model;
-using HundredMilesSoftware.UltraID3Lib;
 
 namespace GoogleMusic_Downloader
 {
@@ -76,14 +75,11 @@ namespace GoogleMusic_Downloader
 			}
 			else
 			{
-				UltraID3 tagger = new UltraID3();
-				tagger.Read(file.DownloadedFile.FullName);
-
-				tagger.ID3v2Tag.Album = file.Album;
-				tagger.ID3v2Tag.Artist = file.Artist;
-				tagger.ID3v2Tag.Title = file.Title;
-
-				tagger.Write();
+                TagLib.File tagger = TagLib.File.Create(file.DownloadedFile.FullName);
+                tagger.Tag.Album = file.Album;
+                tagger.Tag.AlbumArtists = new string[]{file.Artist};
+                tagger.Tag.Title = file.Title;
+                tagger.Save();
 			}
 		}
 

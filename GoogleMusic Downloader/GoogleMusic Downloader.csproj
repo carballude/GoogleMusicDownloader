@@ -44,10 +44,9 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="UltraID3Lib, Version=0.9.6.8, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="taglib-sharp, Version=2.0.4.0, Culture=neutral, PublicKeyToken=db62eba44689b5b0, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>Thirdparty\UltraID3Lib\UltraID3Lib.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>Thirdparty\TagLibSharp\taglib-sharp.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
