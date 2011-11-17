@@ -61,5 +61,15 @@ namespace GoogleMusic_Downloader
                 _downloadWindow = new DownloadWindow(_files, this);
             }
         }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            new AboutBox1().ShowDialog(this);
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Environment.Exit(0);
+        }
     }
 }
